@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Search, Filter, ShoppingCart, Star, Tag, SortAsc, SortDesc, Plus, Minus } from "lucide-react";
 import Navbar from "../components/Navbar";
-import products from "../data/productData"; // import the static data
+import axios from "axios";
+// import products from "../data/productData"; // import the static data
 
 export default function Products() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -10,6 +11,16 @@ export default function Products() {
   const [sortOrder, setSortOrder] = useState("asc");
   const [cart, setCart] = useState([]);
   const [showFilters, setShowFilters] = useState(false);
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const backendURL = process.env.REACT_APP_BACKEND_URL || "http://localhost:5000";
+
+
+  // fetching the products
+  useEffect(() => {
+    fetchProducts();
+  }, []);
 
   // Load cart from localStorage on component mount
   useEffect(() => {
@@ -21,6 +32,22 @@ export default function Products() {
   useEffect(() => {
     localStorage.setItem("cart", JSON.stringify(cart));
   }, [cart]);
+
+
+  const fetchProducts = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get(`${backendURL}/products/browse`);
+      // console.log("Fetched products:", response.data);
+      setProducts(response.data);
+      setError(null);
+    } catch (err) {
+      console.error("Failed to fetch services:", err);
+      setError("Failed to load services from server. Showing available services.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Get unique categories
   const categories = ["all", ...new Set(products.map(p => p.category))];
@@ -53,8 +80,8 @@ export default function Products() {
 
     const existingItem = cart.find(item => item.id === product.id);
     if (existingItem) {
-      setCart(cart.map(item => 
-        item.id === product.id 
+      setCart(cart.map(item =>
+        item.id === product.id
           ? { ...item, quantity: item.quantity + 1 }
           : item
       ));
@@ -91,9 +118,8 @@ export default function Products() {
 
   const showNotification = (message, type) => {
     const notification = document.createElement('div');
-    notification.className = `fixed top-4 right-4 px-6 py-3 rounded-lg text-white z-50 ${
-      type === 'success' ? 'bg-green-500' : 'bg-red-500'
-    }`;
+    notification.className = `fixed top-4 right-4 px-6 py-3 rounded-lg text-white z-50 ${type === 'success' ? 'bg-green-500' : 'bg-red-500'
+      }`;
     notification.textContent = message;
     document.body.appendChild(notification);
     setTimeout(() => document.body.removeChild(notification), 3000);
@@ -107,7 +133,7 @@ export default function Products() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50">
       <Navbar />
-      
+
       <div className="max-w-7xl mx-auto p-6">
         {/* Header Section */}
         <div className="bg-white rounded-2xl shadow-lg p-8 mb-8 border border-gray-100">
@@ -125,7 +151,7 @@ export default function Products() {
                 )}
               </div>
             </div>
-            
+
             {/* Cart Summary */}
             {cart.length > 0 && (
               <div className="bg-gradient-to-r from-green-500 to-green-600 text-white p-4 rounded-xl">
@@ -222,7 +248,7 @@ export default function Products() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {filteredAndSortedProducts.map((product) => {
             const quantityInCart = getItemQuantityInCart(product.id);
-            
+
             return (
               <div key={product.id} className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100 hover:shadow-xl transition-all duration-300 transform hover:scale-105">
                 {/* Product Image */}
@@ -238,10 +264,10 @@ export default function Products() {
                       <Tag size={48} />
                     </div>
                   )}
-                  
+
                   {/* Category Badge */}
                   <div className="absolute top-3 left-3">
-                    <span className="bg-white bg-opacity-90 text-gray-700 px-3 py-1 rounded-full text-xs font-medium">
+                    <span className="bg-gray-300 bg-opacity-50 text-black  px-3 py-1 rounded-full text-xs font-medium">
                       {product.category}
                     </span>
                   </div>
@@ -260,7 +286,7 @@ export default function Products() {
                   <h3 className="font-bold text-gray-900 mb-2 text-lg leading-tight">
                     {product.name}
                   </h3>
-                  
+
                   <div className="flex items-center justify-between mb-4">
                     <span className="text-2xl font-bold text-green-600">₹{product.price}</span>
                     {product.originalPrice && (
