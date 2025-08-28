@@ -16,16 +16,19 @@ app.get("/", (req, res) => {
     res.send("Gram Seva API running...");
 });
 
+// Routes
 const userRoutes = require("./routes/user");
-// const productsRoutes = require("./routes/products");
+app.use("/user", userRoutes);
+
+const productsRoutes = require("./routes/products");
+app.use("/products", productsRoutes);
+
 // const servicesRoutes = require("./routes/services");
 // const newsRoutes = require("./routes/news");
 // const contactRoutes = require("./routes/contact");
 // const bookingRoutes = require("./routes/bookings");
 
 
-app.use("/user", userRoutes);
-// app.use("/api/products", productsRoutes);
 // app.use("/api/services", servicesRoutes);
 // app.use("/api/news", newsRoutes);
 // app.use("/api/contact", contactRoutes);
