@@ -12,7 +12,7 @@ import Dashboard from "./pages/Dashboard";
 function App(){
   return (
     <Router>
-      <Navbar />
+      {/* <Navbar /> */}
       <Routes>
         <Route path="/" element={<Home/>}/>
         <Route path="/products" element={<Products/>}/>

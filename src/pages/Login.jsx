@@ -6,13 +6,14 @@ export default function Login(){
   const [form, setForm] = useState({ email: "", password: "" });
   const [err, setErr] = useState("");
   const nav = useNavigate();
+  const backendURL = process.env.REACT_APP_BACKEND_URL || "http://localhost:5000";
 
   const onChange = e => setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
 
   const submit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post("/auth/login", form);
+      const res = await axios.post(`${backendURL}/user/login`, form);
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("user", JSON.stringify(res.data.user));
       nav("/dashboard");

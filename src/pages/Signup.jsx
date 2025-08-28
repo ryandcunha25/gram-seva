@@ -6,16 +6,18 @@ export default function Signup(){
   const [form, setForm] = useState({ name: "", email: "", password: "", phone: "" });
   const [err, setErr] = useState("");
   const nav = useNavigate();
+  const backendURL = process.env.REACT_APP_BACKEND_URL || "http://localhost:5000";
 
   const onChange = e => setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
 
   const submit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post("/auth/register", form);
+      const res = await axios.post(`${backendURL}/user/register`, form);
+      console.log("Registration response:", res); // Debugging line
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("user", JSON.stringify(res.data.user));
-      nav("/dashboard");
+      nav("/login");
     } catch (error) {
       setErr(error.response?.data?.message || "Registration failed");
     }
