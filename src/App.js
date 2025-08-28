@@ -3,23 +3,16 @@ import './App.css';
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
+      <h1 className="text-4xl font-bold text-blue-600 mb-4">
+        Tailwind is Working! 🎉
+      </h1>
+      <button className="px-6 py-2 bg-green-500 text-white rounded-lg shadow-md hover:bg-green-600">
+        Test Button
+      </button>
     </div>
   );
 }
 
 export default App;
+
