@@ -26,13 +26,15 @@ app.use("/products", productsRoutes);
 const servicesRoutes = require("./routes/services");
 app.use("/services", servicesRoutes);
 
+const contactRoutes = require("./routes/contact");
+app.use("/contact", contactRoutes);
+
+
 // const newsRoutes = require("./routes/news");
-// const contactRoutes = require("./routes/contact");
 // const bookingRoutes = require("./routes/bookings");
 
 
 // app.use("/api/news", newsRoutes);
-// app.use("/api/contact", contactRoutes);
 // app.use("/api/bookings", bookingRoutes);
 
 const PORT = 5000;
