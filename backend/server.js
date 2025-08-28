@@ -23,13 +23,14 @@ app.use("/user", userRoutes);
 const productsRoutes = require("./routes/products");
 app.use("/products", productsRoutes);
 
-// const servicesRoutes = require("./routes/services");
+const servicesRoutes = require("./routes/services");
+app.use("/services", servicesRoutes);
+
 // const newsRoutes = require("./routes/news");
 // const contactRoutes = require("./routes/contact");
 // const bookingRoutes = require("./routes/bookings");
 
 
-// app.use("/api/services", servicesRoutes);
 // app.use("/api/news", newsRoutes);
 // app.use("/api/contact", contactRoutes);
 // app.use("/api/bookings", bookingRoutes);

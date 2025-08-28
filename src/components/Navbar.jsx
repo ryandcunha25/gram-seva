@@ -18,6 +18,7 @@ export default function Navbar() {
       <div className="space-x-4">
         <Link to="/" className="hover:underline">Home</Link>
         <Link to="/products" className="hover:underline">Products</Link>
+        <Link to="/services" className="hover:underline">Services</Link>
         <Link to="/contact" className="hover:underline">Contact</Link>
         {!token ? (
           <>

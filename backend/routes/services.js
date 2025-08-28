@@ -1,13 +1,16 @@
 const express = require("express");
 const router = express.Router();
+const Service = require("../models/Service");
 
-const services = [
-  { id: "s1", name: "Grocery Delivery", icon: "🛒" },
-  { id: "s2", name: "Medical Support", icon: "💊" },
-  { id: "s3", name: "Farming Tools", icon: "🌾" },
-  { id: "s4", name: "Govt Schemes Help", icon: "📑" },
-  { id: "s5", name: "Transport Support", icon: "🚚" }
-];
+// fetching all services
+router.get("/", async (req, res) => {
+  try {
+    console.log("Fetching all services..."); // Debugging line
+    const services = await Service.find({});
+    res.json(services);
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
+  }
+});
 
-router.get("/", (req, res) => res.json(services));
 module.exports = router;
