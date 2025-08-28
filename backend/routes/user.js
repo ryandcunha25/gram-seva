@@ -9,6 +9,7 @@ const router = express.Router();
 
 // Register
 router.post("/register", async (req, res) => {
+  console.log("Registering a new user..."); // Debugging line
   try {
     const { name, email, password, phone } = req.body;
     if (!name || !email || !password) return res.status(400).json({ message: "Missing fields" });
@@ -18,6 +19,7 @@ router.post("/register", async (req, res) => {
     const user = new User({ name, email, password: hash, phone });
     await user.save();
 
+    console.log("User registered:", user); // Debugging line
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "7d" });
     res.json({ token, user: user.toJSON() });
   } catch (err) {
@@ -27,6 +29,7 @@ router.post("/register", async (req, res) => {
 
 // Login
 router.post("/login", async (req, res) => {
+  console.log("Login attempt..."); // Debugging line
   try {
     const { email, password } = req.body;
     if (!email || !password) return res.status(400).json({ message: "Missing email or password" });
@@ -34,6 +37,7 @@ router.post("/login", async (req, res) => {
     if (!user) return res.status(400).json({ message: "Invalid credentials" });
     const ok = await bcrypt.compare(password, user.password);
     if (!ok) return res.status(400).json({ message: "Invalid credentials" });
+    console.log("User logged in:", user); // Debugging line
 
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "7d" });
     res.json({ token, user: user.toJSON() });
