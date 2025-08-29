@@ -34,7 +34,7 @@ Built with **React.js, Node.js, Express, and MongoDB**, it provides a smooth and
 
 5. **Run the backend**
    ```bash
-   cd backend<br>
+   cd backend <br>
    node server.js
    ```
 
