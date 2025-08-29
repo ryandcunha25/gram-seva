@@ -57,7 +57,7 @@ export default function Home() {
     const fetchProducts = async () => {
       try {
         setLoading(prev => ({ ...prev, products: true }));
-        const response = await fetch(backendURL + "/products/browse");
+        const response = await fetch(backendURL + "/products");
         if (!response.ok) throw new Error("Failed to fetch products");
         const data = await response.json();
         setProducts(data.splice(0, 6));

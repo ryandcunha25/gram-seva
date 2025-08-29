@@ -3,6 +3,7 @@ import { Search, Filter, ShoppingCart, Star, Tag, SortAsc, SortDesc, Plus, Minus
 import Navbar from "../components/Navbar";
 import axios from "axios";
 import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
 export default function Products() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -16,6 +17,7 @@ export default function Products() {
   const [error, setError] = useState(null);
   const [showCartModal, setShowCartModal] = useState(false);
   const [isBooking, setIsBooking] = useState(false);
+  const navigate = useNavigate();
   const backendURL = process.env.REACT_APP_BACKEND_URL || "http://localhost:5000";
 
   // fetching the products
@@ -37,7 +39,7 @@ export default function Products() {
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`${backendURL}/products/browse`);
+      const response = await axios.get(`${backendURL}/products`);
       setProducts(response.data);
       setError(null);
     } catch (err) {
@@ -162,7 +164,8 @@ export default function Products() {
 
       if (response.status === 200 || response.status === 201) {
         showNotification("Booking successful! Your order has been placed.", "success");
-        setCart([]); // Clear cart after successful booking
+        setCart([]);
+        setTimeout(() => { navigate("/dashboard"); }, 1000);
         setShowCartModal(false);
       }
     } catch (err) {
@@ -295,8 +298,8 @@ export default function Products() {
                   onClick={bookCart}
                   disabled={isBooking}
                   className={`flex-1 px-4 py-3 rounded-lg font-semibold flex items-center justify-center gap-2 transition-all ${isBooking
-                      ? 'bg-gray-400 text-white cursor-not-allowed'
-                      : 'bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700'
+                    ? 'bg-gray-400 text-white cursor-not-allowed'
+                    : 'bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700'
                     }`}
                 >
                   {isBooking ? (
