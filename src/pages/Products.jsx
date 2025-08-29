@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Search, Filter, ShoppingCart, Star, Tag, SortAsc, SortDesc, Plus, Minus, X, Eye, Calendar } from "lucide-react";
 import Navbar from "../components/Navbar";
 import axios from "axios";
+import toast from "react-hot-toast";
 
 export default function Products() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -72,7 +73,7 @@ export default function Products() {
   const addToCart = (product) => {
     const token = localStorage.getItem("token");
     if (!token) {
-      alert("Please log in to add products to cart");
+      toast.error("Please log in to add products to cart");
       return;
     }
 
