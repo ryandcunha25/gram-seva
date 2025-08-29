@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { User, Edit3, Save, X, Calendar, Package, Phone, Mail, ShoppingBag, Clock, CheckCircle, Search, Filter } from "lucide-react";
 import Navbar from "../components/Navbar";
+import toast from 'react-hot-toast';
+
 
 export default function Dashboard() {
   const [user, setUser] = useState(JSON.parse(localStorage.getItem("user") || "null"));
@@ -46,7 +48,7 @@ export default function Dashboard() {
 
     // Filter by search term (booking ID)
     if (searchTerm) {
-      filtered = filtered.filter(booking => 
+      filtered = filtered.filter(booking =>
         booking._id.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
@@ -55,7 +57,7 @@ export default function Dashboard() {
     filtered.sort((a, b) => {
       const dateA = new Date(a.createdAt);
       const dateB = new Date(b.createdAt);
-      
+
       if (sortOrder === "latest") {
         return dateB - dateA; // Newest first
       } else {
@@ -118,7 +120,6 @@ export default function Dashboard() {
   };
 
   const showNotification = (message, type) => {
-    // Simple notification - you can replace with a toast library
     const notification = document.createElement('div');
     notification.className = `fixed top-4 right-4 px-6 py-3 rounded-lg text-white z-50 ${type === 'success' ? 'bg-green-500' : 'bg-red-500'
       }`;
@@ -422,7 +423,7 @@ export default function Dashboard() {
                               {booking.items.reduce((total, item) => total + item.quantity, 0)}
                             </span>
                           </div>
-                          
+
                           {/* Number of Different Products */}
                           <div className="flex items-center justify-between">
                             <span className="text-sm text-gray-700 flex items-center gap-2">
@@ -442,7 +443,7 @@ export default function Dashboard() {
 
                           {/* Separator */}
                           <div className="border-t border-blue-200 my-2"></div>
-                          
+
                           {/* Total Amount */}
                           <div className="flex items-center justify-between">
                             <span className="text-lg font-semibold text-gray-900">Total Amount:</span>

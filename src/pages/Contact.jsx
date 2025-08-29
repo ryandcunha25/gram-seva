@@ -105,7 +105,7 @@ export default function Contact() {
     {
       icon: MapPin,
       title: "Our Address",
-      details: ["123 Business District", "Mumbai, Maharashtra 400001", "India"],
+      details: ["Gram Seva Center, Village Road", "Mumbai, Maharashtra 400001", "India"],
       color: "text-blue-600"
     },
     {
@@ -365,7 +365,7 @@ export default function Contact() {
                 {/* Overlay for click interaction */}
                 <div 
                   className="absolute inset-0 bg-transparent cursor-pointer"
-                  onClick={() => window.open('https://maps.google.com?q=Business+District+Mumbai+Maharashtra+India', '_blank')}
+                  onClick={() => window.open('https://maps.google.com?q=Gram+Seva+Center+Mumbai+Maharashtra+India', '_blank')}
                   title="Click to open in Google Maps"
                 />
               </div>
@@ -394,7 +394,7 @@ export default function Contact() {
                 <div className="mt-4 pt-4 border-t border-gray-200">
                   <div className="flex items-start justify-between">
                     <div>
-                      <p className="font-medium text-gray-900">123 Business District</p>
+                      <p className="font-medium text-gray-900">Gram Seva Center, Village Road</p>
                       <p className="text-gray-600 text-sm">Mumbai, Maharashtra 400001, India</p>
                     </div>
                     <button

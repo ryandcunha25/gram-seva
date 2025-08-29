@@ -73,7 +73,7 @@ export default function Services() {
 
     const handleServiceClick = (service) => {
         // Navigate to related products or service booking page
-        alert(`Redirecting to ${service.name} booking page...`);
+        // alert(`Redirecting to ${service.name} booking page...`);
         // In a real app, you would use: navigate(`/services/${service._id}`) or navigate(`/products?category=${service.category}`)
     };
 
