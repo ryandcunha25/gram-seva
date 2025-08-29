@@ -52,10 +52,12 @@ router.get("/me", auth, (req, res) => {
 });
 
 // Update profile
-router.put("/me", auth, async (req, res) => {
+router.put("/update", auth, async (req, res) => {
+  console.log("Updating user profile..."); // Debugging line
   try {
     const { name, phone } = req.body;
     const user = await User.findByIdAndUpdate(req.user._id, { name, phone }, { new: true }).select("-password");
+    console.log("User profile updated:", user); // Debugging line
     res.json({ user });
   } catch (err) {
     res.status(500).json({ message: "Server error" });

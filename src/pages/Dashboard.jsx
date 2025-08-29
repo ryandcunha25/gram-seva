@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { User, Edit3, Save, X, Calendar, Package, Phone, Mail, ShoppingBag, Clock, CheckCircle } from "lucide-react";
+import { User, Edit3, Save, X, Calendar, Package, Phone, Mail, ShoppingBag, Clock, CheckCircle, Search, Filter } from "lucide-react";
 import Navbar from "../components/Navbar";
 
 export default function Dashboard() {
   const [user, setUser] = useState(JSON.parse(localStorage.getItem("user") || "null"));
   const [bookings, setBookings] = useState([]);
+  const [filteredBookings, setFilteredBookings] = useState([]);
   const [editing, setEditing] = useState(false);
   const [profile, setProfile] = useState({
     name: user?.name || "",
@@ -13,11 +14,18 @@ export default function Dashboard() {
     email: user?.email || ""
   });
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [sortOrder, setSortOrder] = useState("latest"); // "latest" or "earliest"
   const backendURL = process.env.REACT_APP_BACKEND_URL || "http://localhost:5000";
 
   useEffect(() => {
     fetchBookings();
   }, []);
+
+  useEffect(() => {
+    filterAndSortBookings();
+  }, [bookings, searchTerm, sortOrder]);
 
   const fetchBookings = async () => {
     try {
@@ -26,17 +34,77 @@ export default function Dashboard() {
           Authorization: `Bearer ${localStorage.getItem("token")}`
         }
       });
-      console.log("Bookings fetched:", response.data); // Debugging line  
+      // console.log("Bookings fetched:", response.data); // Debugging line  
       setBookings(response.data);
     } catch (error) {
       console.error("Failed to fetch bookings:", error);
     }
   };
 
+  const filterAndSortBookings = () => {
+    let filtered = [...bookings];
+
+    // Filter by search term (booking ID)
+    if (searchTerm) {
+      filtered = filtered.filter(booking => 
+        booking._id.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    // Sort by date
+    filtered.sort((a, b) => {
+      const dateA = new Date(a.createdAt);
+      const dateB = new Date(b.createdAt);
+      
+      if (sortOrder === "latest") {
+        return dateB - dateA; // Newest first
+      } else {
+        return dateA - dateB; // Oldest first
+      }
+    });
+
+    setFilteredBookings(filtered);
+  };
+
+  const validateForm = () => {
+    if (!profile.name.trim()) {
+      setError("Name is required");
+      return false;
+    }
+    if (profile.email && !isValidEmail(profile.email)) {
+      setError("Please enter a valid email address");
+      return false;
+    }
+    if (profile.phone && !isValidPhone(profile.phone)) {
+      setError("Please enter a valid phone number");
+      return false;
+    }
+    return true;
+  };
+
+  const isValidEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const isValidPhone = (phone) => {
+    const phoneRegex = /^(\+91[\-\s]?)?[0]?(91)?[789]\d{9}$/;
+    return phoneRegex.test(phone);
+  };
+
   const saveProfile = async () => {
+    if (!validateForm()) {
+      showNotification(error, "error");
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     try {
-      const res = await axios.put("/auth/me", profile);
+      const res = await axios.put(backendURL + "/user/update", profile, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`
+        }
+      });
       localStorage.setItem("user", JSON.stringify(res.data.user));
       setUser(res.data.user);
       setEditing(false);
@@ -225,96 +293,169 @@ export default function Dashboard() {
         </div>
 
         {/* Bookings Section */}
-        <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
-          <div className="flex items-center gap-3 mb-6">
-            <Calendar className="text-blue-600" size={24} />
-            <h3 className="text-2xl font-semibold text-gray-900">Your Bookings</h3>
-            <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
-              {bookings.length} {bookings.length === 1 ? 'booking' : 'bookings'}
-            </span>
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-100">
+          <div className="p-2 border-b border-gray-100">
+            <div className="flex items-center gap-3 mb-6">
+              <Calendar className="text-blue-600" size={24} />
+              <h3 className="text-2xl font-semibold text-gray-900">Your Bookings</h3>
+              <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+                {filteredBookings.length} {filteredBookings.length === 1 ? 'booking' : 'bookings'}
+              </span>
+            </div>
+
+            {/* Search and Filter Controls */}
+            {bookings.length > 0 && (
+              <div className="flex flex-col sm:flex-row gap-4 mb-6">
+                {/* Search Input */}
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                  <input
+                    type="text"
+                    placeholder="Search by booking ID..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  />
+                </div>
+
+                {/* Sort Dropdown */}
+                <div className="relative">
+                  <select
+                    value={sortOrder}
+                    onChange={(e) => setSortOrder(e.target.value)}
+                    className="appearance-none bg-white border border-gray-300 rounded-lg px-4 py-3 pr-10 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all cursor-pointer"
+                  >
+                    <option value="latest">Latest First</option>
+                    <option value="earliest">Earliest First</option>
+                  </select>
+                  <Filter className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
+                </div>
+              </div>
+            )}
           </div>
 
-          {bookings.length === 0 ? (
-            <div className="text-center py-12">
-              <Package className="mx-auto text-gray-400 mb-4" size={48} />
-              <h4 className="text-xl font-medium text-gray-900 mb-2">No bookings yet</h4>
-              <p className="text-gray-600 mb-6">Start by browsing our products or services</p>
-              <div className="flex gap-3 justify-center">
-                <a
-                  href="/products"
-                  className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  Browse Products
-                </a>
-                <a
-                  href="/services"
-                  className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-                >
-                  Book Service
-                </a>
-              </div>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {bookings.map((booking, index) => (
-                <div key={booking._id} className="border border-gray-200 rounded-xl p-6 hover:shadow-md transition-shadow">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                        <span className="text-blue-600 font-semibold">#{index + 1}</span>
-                      </div>
-                      <div>
-                        <p className="font-semibold text-gray-900">Booking #{booking._id?.slice(-6)}</p>
-                        <div className="flex items-center gap-2 text-sm text-gray-600">
-                          <Calendar size={14} />
-                          {new Date(booking.createdAt).toLocaleDateString('en-US', {
-                            year: 'numeric',
-                            month: 'long',
-                            day: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit'
-                          })}
-                        </div>
-                      </div>
-                    </div>
-                    {/* {getStatusBadge(booking.status)} */}
-                  </div>
-
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div>
-                      <h4 className="font-medium text-gray-900 mb-3">Items Ordered:</h4>
-                      <div className="space-y-2">
-                        {booking.items.map((item, idx) => (
-                          <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                            <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                                <Package size={14} className="text-blue-600" />
-                              </div>
-                              <div>
-                                <p className="font-medium text-gray-900">{item.name}</p>
-                                <p className="text-sm text-gray-600">Quantity: {item.quantity}</p>
-                              </div>
-                            </div>
-                            <p className="font-semibold text-gray-900">₹{item.price}</p>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="lg:border-l lg:border-gray-200 lg:pl-6">
-                      <h4 className="font-medium text-gray-900 mb-3">Order Summary:</h4>
-                      <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-4 rounded-lg">
-                        <div className="flex items-center justify-between">
-                          <span className="text-lg font-semibold text-gray-900">Total Amount:</span>
-                          <span className="text-2xl font-bold text-blue-600">₹{booking.totalAmount}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+          {/* Bookings Content */}
+          <div className="p-2">
+            {bookings.length === 0 ? (
+              <div className="text-center py-12">
+                <Package className="mx-auto text-gray-400 mb-4" size={48} />
+                <h4 className="text-xl font-medium text-gray-900 mb-2">No bookings yet</h4>
+                <p className="text-gray-600 mb-6">Start by browsing our products or services</p>
+                <div className="flex gap-3 justify-center">
+                  <a
+                    href="/products"
+                    className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    Browse Products
+                  </a>
+                  <a
+                    href="/services"
+                    className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                  >
+                    Book Service
+                  </a>
                 </div>
-              ))}
-            </div>
-          )}
+              </div>
+            ) : filteredBookings.length === 0 ? (
+              <div className="text-center py-12">
+                <Search className="mx-auto text-gray-400 mb-4" size={48} />
+                <h4 className="text-xl font-medium text-gray-900 mb-2">No bookings found</h4>
+                <p className="text-gray-600">Try adjusting your search criteria</p>
+              </div>
+            ) : (
+              <div className="max-h-96 overflow-y-auto pr-2 space-y-4">
+                {filteredBookings.map((booking, index) => (
+                  <div key={booking._id} className="border border-gray-200 rounded-xl p-6 hover:shadow-md transition-shadow">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                          <span className="text-blue-600 font-semibold">#{index + 1}</span>
+                        </div>
+                        <div>
+                          <p className="font-semibold text-gray-900">Booking #{booking._id?.slice(-6)}</p>
+                          <div className="flex items-center gap-2 text-sm text-gray-600">
+                            <Calendar size={14} />
+                            {new Date(booking.createdAt).toLocaleDateString('en-US', {
+                              year: 'numeric',
+                              month: 'long',
+                              day: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })}
+                          </div>
+                        </div>
+                      </div>
+                      {/* {getStatusBadge(booking.status)} */}
+                    </div>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                      <div>
+                        <h4 className="font-medium text-gray-900 mb-3">Items Ordered:</h4>
+                        <div className="space-y-2">
+                          {booking.items.map((item, idx) => (
+                            <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                              <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                                  <Package size={14} className="text-blue-600" />
+                                </div>
+                                <div>
+                                  <p className="font-medium text-gray-900">{item.name}</p>
+                                  <p className="text-sm text-gray-600">Quantity: {item.quantity}</p>
+                                </div>
+                              </div>
+                              <p className="font-semibold text-gray-900">₹{item.price}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="lg:border-l lg:border-gray-200 lg:pl-6">
+                        <h4 className="font-medium text-gray-900 mb-3">Order Summary:</h4>
+                        <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-4 rounded-lg space-y-3">
+                          {/* Total Items */}
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-gray-700 flex items-center gap-2">
+                              <Package size={16} className="text-blue-600" />
+                              Total Items:
+                            </span>
+                            <span className="font-semibold text-gray-900">
+                              {booking.items.reduce((total, item) => total + item.quantity, 0)}
+                            </span>
+                          </div>
+                          
+                          {/* Number of Different Products */}
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-gray-700 flex items-center gap-2">
+                              <ShoppingBag size={16} className="text-green-600" />
+                              Unique Products:
+                            </span>
+                            <span className="font-semibold text-gray-900">{booking.items.length}</span>
+                          </div>
+
+                          {/* Average Item Price */}
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-gray-700">Average Item Price:</span>
+                            <span className="font-semibold text-gray-900">
+                              ₹{(booking.totalAmount / booking.items.reduce((total, item) => total + item.quantity, 0)).toFixed(2)}
+                            </span>
+                          </div>
+
+                          {/* Separator */}
+                          <div className="border-t border-blue-200 my-2"></div>
+                          
+                          {/* Total Amount */}
+                          <div className="flex items-center justify-between">
+                            <span className="text-lg font-semibold text-gray-900">Total Amount:</span>
+                            <span className="text-2xl font-bold text-blue-600">₹{booking.totalAmount}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
