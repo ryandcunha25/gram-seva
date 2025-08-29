@@ -17,7 +17,7 @@ Built with **React.js, Node.js, Express, and MongoDB**, it provides a smooth and
 
 1. **Clone the Repository**
    ```bash
-   git clone https://github.com/your-username/gramseva.git
+   git clone https://github.com/ryandcunha25/gramseva.git
    cd gramseva
    ```
 
