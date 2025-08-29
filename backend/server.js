@@ -29,13 +29,11 @@ app.use("/services", servicesRoutes);
 const contactRoutes = require("./routes/contact");
 app.use("/contact", contactRoutes);
 
+const bookingRoutes = require("./routes/bookings");
+app.use("/bookings", bookingRoutes);
 
 // const newsRoutes = require("./routes/news");
-// const bookingRoutes = require("./routes/bookings");
-
-
 // app.use("/api/news", newsRoutes);
-// app.use("/api/bookings", bookingRoutes);
 
 const PORT = 5000;
 app.listen(PORT, () => console.log(`\n🚀 Server running on port ${PORT}`));

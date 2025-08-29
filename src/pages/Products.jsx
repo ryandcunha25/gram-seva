@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { Search, Filter, ShoppingCart, Star, Tag, SortAsc, SortDesc, Plus, Minus } from "lucide-react";
+import { Search, Filter, ShoppingCart, Star, Tag, SortAsc, SortDesc, Plus, Minus, X, Eye, Calendar } from "lucide-react";
 import Navbar from "../components/Navbar";
 import axios from "axios";
-// import products from "../data/productData"; // import the static data
 
 export default function Products() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -14,8 +13,9 @@ export default function Products() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [showCartModal, setShowCartModal] = useState(false);
+  const [isBooking, setIsBooking] = useState(false);
   const backendURL = process.env.REACT_APP_BACKEND_URL || "http://localhost:5000";
-
 
   // fetching the products
   useEffect(() => {
@@ -33,12 +33,10 @@ export default function Products() {
     localStorage.setItem("cart", JSON.stringify(cart));
   }, [cart]);
 
-
   const fetchProducts = async () => {
     try {
       setLoading(true);
       const response = await axios.get(`${backendURL}/products/browse`);
-      // console.log("Fetched products:", response.data);
       setProducts(response.data);
       setError(null);
     } catch (err) {
@@ -89,7 +87,6 @@ export default function Products() {
       setCart([...cart, { ...product, quantity: 1 }]);
     }
 
-    // Show success notification
     showNotification(`${product.name} added to cart!`, "success");
   };
 
@@ -101,6 +98,11 @@ export default function Products() {
       }
       return item;
     }).filter(Boolean));
+  };
+
+  const removeFromCart = (productId) => {
+    setCart(cart.filter(item => item._id !== productId));
+    showNotification("Item removed from cart!", "success");
   };
 
   const getItemQuantityInCart = (productId) => {
@@ -116,10 +118,63 @@ export default function Products() {
     return cart.reduce((total, item) => total + (item.price * item.quantity), 0);
   };
 
+  const bookCart = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      showNotification("Please log in to book your cart", "error");
+      return;
+    }
+
+    if (cart.length === 0) {
+      showNotification("Your cart is empty!", "error");
+      return;
+    }
+
+    try {
+      setIsBooking(true);
+
+      // Prepare booking data
+      const bookingData = {
+        items: cart.map(item => ({
+          productId: item._id,
+          name: item.name,
+          price: item.price,
+          quantity: item.quantity,
+          category: item.category
+        })),
+        totalAmount: getTotalCartValue(),
+        totalItems: getTotalCartItems(),
+        bookingDate: new Date().toISOString()
+      };
+
+      // Send booking request to backend
+      const response = await axios.post(
+        `${backendURL}/bookings/create`,
+        bookingData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      if (response.status === 200 || response.status === 201) {
+        showNotification("Booking successful! Your order has been placed.", "success");
+        setCart([]); // Clear cart after successful booking
+        setShowCartModal(false);
+      }
+    } catch (err) {
+      console.error("Booking failed:", err);
+      showNotification("Booking failed. Please try again.", "error");
+    } finally {
+      setIsBooking(false);
+    }
+  };
+
   const showNotification = (message, type) => {
     const notification = document.createElement('div');
-    notification.className = `fixed top-4 right-4 px-6 py-3 rounded-lg text-white z-50 ${type === 'success' ? 'bg-green-500' : 'bg-red-500'
-      }`;
+    notification.className = `fixed top-4 right-4 px-6 py-3 rounded-lg text-white z-50 ${type === 'success' ? 'bg-green-500' : 'bg-red-500'}`;
     notification.textContent = message;
     document.body.appendChild(notification);
     setTimeout(() => document.body.removeChild(notification), 3000);
@@ -128,6 +183,139 @@ export default function Products() {
   const clearCart = () => {
     setCart([]);
     showNotification("Cart cleared!", "success");
+  };
+
+  // Cart Modal Component
+  const CartModal = () => {
+    if (!showCartModal) return null;
+
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden">
+          {/* Modal Header */}
+          <div className="flex items-center justify-between p-6 border-b border-gray-200">
+            <h2 className="text-2xl font-bold text-gray-900">Your Cart</h2>
+            <button
+              onClick={() => setShowCartModal(false)}
+              className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+            >
+              <X size={24} />
+            </button>
+          </div>
+
+          {/* Modal Content */}
+          <div className="overflow-y-auto max-h-96">
+            {cart.length === 0 ? (
+              <div className="text-center py-12">
+                <ShoppingCart size={64} className="mx-auto text-gray-400 mb-4" />
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">Your cart is empty</h3>
+                <p className="text-gray-600">Add some products to get started!</p>
+              </div>
+            ) : (
+              <div className="p-6 space-y-4">
+                {cart.map((item) => (
+                  <div key={item._id} className="flex items-center gap-4 p-4 border border-gray-200 rounded-lg">
+                    {/* Product Image */}
+                    <div className="w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg flex items-center justify-center">
+                      {item.image ? (
+                        <img
+                          src={item.image}
+                          alt={item.name}
+                          className="w-full h-full object-cover rounded-lg"
+                        />
+                      ) : (
+                        <Tag size={24} className="text-gray-400" />
+                      )}
+                    </div>
+
+                    {/* Product Details */}
+                    <div className="flex-1">
+                      <h4 className="font-semibold text-gray-900">{item.name}</h4>
+                      <p className="text-sm text-gray-600">{item.category}</p>
+                      <p className="text-lg font-bold text-green-600">₹{item.price}</p>
+                    </div>
+
+                    {/* Quantity Controls */}
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={() => updateQuantity(item._id, -1)}
+                        className="w-8 h-8 bg-gray-200 text-gray-700 rounded-full flex items-center justify-center hover:bg-gray-300 transition-colors"
+                      >
+                        <Minus size={14} />
+                      </button>
+                      <span className="font-semibold text-gray-900 w-8 text-center">
+                        {item.quantity}
+                      </span>
+                      <button
+                        onClick={() => updateQuantity(item._id, 1)}
+                        className="w-8 h-8 bg-green-500 text-white rounded-full flex items-center justify-center hover:bg-green-600 transition-colors"
+                      >
+                        <Plus size={14} />
+                      </button>
+                    </div>
+
+                    {/* Remove Button */}
+                    <button
+                      onClick={() => removeFromCart(item._id)}
+                      className="p-2 text-red-500 hover:bg-red-50 rounded-full transition-colors"
+                    >
+                      <X size={20} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Modal Footer */}
+          {cart.length > 0 && (
+            <div className="border-t border-gray-200 p-6">
+              {/* Cart Summary */}
+              <div className="bg-gray-50 rounded-lg p-4 mb-4">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-gray-700">Total Items:</span>
+                  <span className="font-semibold">{getTotalCartItems()}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-700">Total Amount:</span>
+                  <span className="text-2xl font-bold text-green-600">₹{getTotalCartValue()}</span>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-3">
+                <button
+                  onClick={clearCart}
+                  className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  Clear Cart
+                </button>
+                <button
+                  onClick={bookCart}
+                  disabled={isBooking}
+                  className={`flex-1 px-4 py-3 rounded-lg font-semibold flex items-center justify-center gap-2 transition-all ${isBooking
+                      ? 'bg-gray-400 text-white cursor-not-allowed'
+                      : 'bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700'
+                    }`}
+                >
+                  {isBooking ? (
+                    <>
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      Booking...
+                    </>
+                  ) : (
+                    <>
+                      <Calendar size={18} />
+                      Book Now
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -152,24 +340,31 @@ export default function Products() {
               </div>
             </div>
 
-            {/* Cart Summary */}
-            {cart.length > 0 && (
-              <div className="bg-gradient-to-r from-green-500 to-green-600 text-white p-4 rounded-xl">
-                <div className="flex items-center gap-3">
-                  <ShoppingCart size={24} />
-                  <div>
-                    <p className="font-semibold">{getTotalCartItems()} Items</p>
-                    <p className="text-green-100">₹{getTotalCartValue()} Total</p>
-                  </div>
+            {/* Cart Summary with View Cart Button */}
+            <div className="bg-gradient-to-r from-green-500 to-green-600 text-white p-4 rounded-xl">
+              <div className="flex items-center gap-3 mb-3">
+                <ShoppingCart size={24} />
+                <div>
+                  <p className="font-semibold">{getTotalCartItems()} Items</p>
+                  <p className="text-green-100">₹{getTotalCartValue()} Total</p>
                 </div>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setShowCartModal(true)}
+                  className="flex-1 bg-white text-green-600 hover:bg-green-50 px-3 py-2 rounded text-sm font-medium transition-colors flex items-center justify-center gap-2"
+                >
+                  <Eye size={16} />
+                  View
+                </button>
                 <button
                   onClick={clearCart}
-                  className="mt-2 text-xs bg-green-400 hover:bg-green-300 px-3 py-1 rounded text-green-800 transition-colors"
+                  className="bg-green-400 hover:bg-green-300 px-3 py-2 rounded text-green-800 transition-colors text-sm"
                 >
-                  Clear Cart
+                  Clear
                 </button>
               </div>
-            )}
+            </div>
           </div>
         </div>
 
@@ -267,7 +462,7 @@ export default function Products() {
 
                   {/* Category Badge */}
                   <div className="absolute top-3 left-3">
-                    <span className="bg-gray-300 bg-opacity-50 text-black  px-3 py-1 rounded-full text-xs font-medium">
+                    <span className="bg-gray-300 bg-opacity-50 text-black px-3 py-1 rounded-full text-xs font-medium">
                       {product.category}
                     </span>
                   </div>
@@ -336,7 +531,7 @@ export default function Products() {
         </div>
 
         {/* No Products Found */}
-        {filteredAndSortedProducts.length === 0 && (
+        {filteredAndSortedProducts.length === 0 && !loading && (
           <div className="text-center py-16">
             <div className="text-gray-400 mb-4">
               <Search size={64} className="mx-auto" />
@@ -357,13 +552,24 @@ export default function Products() {
           </div>
         )}
 
+        {/* Loading State */}
+        {loading && (
+          <div className="text-center py-16">
+            <div className="w-12 h-12 border-4 border-green-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading products...</p>
+          </div>
+        )}
+
         {/* Results Summary */}
-        {filteredAndSortedProducts.length > 0 && (
+        {filteredAndSortedProducts.length > 0 && !loading && (
           <div className="mt-8 text-center text-gray-600">
             Showing {filteredAndSortedProducts.length} of {products.length} products
           </div>
         )}
       </div>
+
+      {/* Cart Modal */}
+      <CartModal />
     </div>
   );
 }

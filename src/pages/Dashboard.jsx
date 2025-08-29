@@ -7,12 +7,13 @@ export default function Dashboard() {
   const [user, setUser] = useState(JSON.parse(localStorage.getItem("user") || "null"));
   const [bookings, setBookings] = useState([]);
   const [editing, setEditing] = useState(false);
-  const [profile, setProfile] = useState({ 
-    name: user?.name || "", 
+  const [profile, setProfile] = useState({
+    name: user?.name || "",
     phone: user?.phone || "",
     email: user?.email || ""
   });
   const [loading, setLoading] = useState(false);
+  const backendURL = process.env.REACT_APP_BACKEND_URL || "http://localhost:5000";
 
   useEffect(() => {
     fetchBookings();
@@ -20,7 +21,12 @@ export default function Dashboard() {
 
   const fetchBookings = async () => {
     try {
-      const response = await axios.get("/bookings");
+      const response = await axios.get(backendURL + "/bookings/userBookings", {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`
+        }
+      });
+      console.log("Bookings fetched:", response.data); // Debugging line  
       setBookings(response.data);
     } catch (error) {
       console.error("Failed to fetch bookings:", error);
@@ -46,9 +52,8 @@ export default function Dashboard() {
   const showNotification = (message, type) => {
     // Simple notification - you can replace with a toast library
     const notification = document.createElement('div');
-    notification.className = `fixed top-4 right-4 px-6 py-3 rounded-lg text-white z-50 ${
-      type === 'success' ? 'bg-green-500' : 'bg-red-500'
-    }`;
+    notification.className = `fixed top-4 right-4 px-6 py-3 rounded-lg text-white z-50 ${type === 'success' ? 'bg-green-500' : 'bg-red-500'
+      }`;
     notification.textContent = message;
     document.body.appendChild(notification);
     setTimeout(() => document.body.removeChild(notification), 3000);
@@ -74,7 +79,7 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       <Navbar />
-      
+
       <div className="max-w-6xl mx-auto p-6 space-y-8">
         {/* Welcome Section */}
         <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
@@ -116,7 +121,7 @@ export default function Dashboard() {
                     <input
                       type="text"
                       value={profile.name}
-                      onChange={(e) => setProfile({...profile, name: e.target.value})}
+                      onChange={(e) => setProfile({ ...profile, name: e.target.value })}
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                       placeholder="Enter your name"
                     />
@@ -126,7 +131,7 @@ export default function Dashboard() {
                     <input
                       type="tel"
                       value={profile.phone}
-                      onChange={(e) => setProfile({...profile, phone: e.target.value})}
+                      onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                       placeholder="Enter your phone number"
                     />
@@ -137,7 +142,7 @@ export default function Dashboard() {
                   <input
                     type="email"
                     value={profile.email}
-                    onChange={(e) => setProfile({...profile, email: e.target.value})}
+                    onChange={(e) => setProfile({ ...profile, email: e.target.value })}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                     placeholder="Enter your email"
                   />
@@ -272,7 +277,7 @@ export default function Dashboard() {
                         </div>
                       </div>
                     </div>
-                    {getStatusBadge(booking.status)}
+                    {/* {getStatusBadge(booking.status)} */}
                   </div>
 
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -287,7 +292,7 @@ export default function Dashboard() {
                               </div>
                               <div>
                                 <p className="font-medium text-gray-900">{item.name}</p>
-                                <p className="text-sm text-gray-600">Quantity: {item.qty}</p>
+                                <p className="text-sm text-gray-600">Quantity: {item.quantity}</p>
                               </div>
                             </div>
                             <p className="font-semibold text-gray-900">₹{item.price}</p>
@@ -301,7 +306,7 @@ export default function Dashboard() {
                       <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-4 rounded-lg">
                         <div className="flex items-center justify-between">
                           <span className="text-lg font-semibold text-gray-900">Total Amount:</span>
-                          <span className="text-2xl font-bold text-blue-600">₹{booking.total}</span>
+                          <span className="text-2xl font-bold text-blue-600">₹{booking.totalAmount}</span>
                         </div>
                       </div>
                     </div>

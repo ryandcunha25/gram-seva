@@ -1,17 +1,20 @@
 const mongoose = require("mongoose");
 
 const bookingSchema = new mongoose.Schema({
-  user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true }, 
   items: [
     {
-      productId: String,
-      name: String,
-      price: Number,
-      qty: { type: Number, default: 1 }
+      productId: { type: mongoose.Schema.Types.ObjectId, ref: "Product", required: true },
+      name: { type: String, required: true },
+      price: { type: Number, required: true },
+      quantity: { type: Number, required: true },
+      category: { type: String }
     }
   ],
-  total: { type: Number, required: true },
-  status: { type: String, default: "pending" }
-}, { timestamps: true });
+  totalAmount: { type: Number, required: true },
+  totalItems: { type: Number, required: true },
+  bookingDate: { type: Date, default: Date.now },
+  status: { type: String, default: "Pending" } 
+}, { timestamps: true }); 
 
 module.exports = mongoose.model("Booking", bookingSchema);
