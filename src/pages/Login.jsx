@@ -137,16 +137,6 @@ export default function Login() {
             </button>
           </div>
 
-          {/* Divider */}
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-200"></div>
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-4 bg-white text-gray-500">or continue with</span>
-            </div>
-          </div>
-
           {/* Sign up link */}
           <div className="text-center">
             <p className="text-gray-600">
