@@ -15,6 +15,7 @@ import {
     Loader
 } from "lucide-react";
 import Navbar from "../components/Navbar";
+import { Link } from "react-router-dom";
 
 export default function Services() {
     const [services, setServices] = useState([]);
@@ -82,8 +83,8 @@ export default function Services() {
                 key={i}
                 size={12}
                 className={`${i < Math.floor(rating)
-                        ? "text-yellow-400 fill-current"
-                        : "text-gray-300"
+                    ? "text-yellow-400 fill-current"
+                    : "text-gray-300"
                     }`}
             />
         ));
@@ -267,9 +268,11 @@ export default function Services() {
                             Can't find what you're looking for? Contact us for personalized service solutions
                             tailored to your specific needs.
                         </p>
-                        <button className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-blue-50 transition-colors">
-                            Contact Us
-                        </button>
+                        <Link to="/contact">
+                            <button className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-blue-50 transition-colors">
+                                Contact Us
+                            </button>
+                        </Link>
                     </div>
                 </div>
             </div>

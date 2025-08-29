@@ -78,10 +78,10 @@ export default function Products() {
       return;
     }
 
-    const existingItem = cart.find(item => item.id === product.id);
+    const existingItem = cart.find(item => item._id === product._id);
     if (existingItem) {
       setCart(cart.map(item =>
-        item.id === product.id
+        item._id === product._id
           ? { ...item, quantity: item.quantity + 1 }
           : item
       ));
@@ -95,7 +95,7 @@ export default function Products() {
 
   const updateQuantity = (productId, change) => {
     setCart(cart.map(item => {
-      if (item.id === productId) {
+      if (item._id === productId) {
         const newQuantity = item.quantity + change;
         return newQuantity > 0 ? { ...item, quantity: newQuantity } : null;
       }
@@ -104,7 +104,7 @@ export default function Products() {
   };
 
   const getItemQuantityInCart = (productId) => {
-    const item = cart.find(item => item.id === productId);
+    const item = cart.find(item => item._id === productId);
     return item ? item.quantity : 0;
   };
 
@@ -247,10 +247,10 @@ export default function Products() {
         {/* Products Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {filteredAndSortedProducts.map((product) => {
-            const quantityInCart = getItemQuantityInCart(product.id);
+            const quantityInCart = getItemQuantityInCart(product._id);
 
             return (
-              <div key={product.id} className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100 hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+              <div key={product._id} className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100 hover:shadow-xl transition-all duration-300 transform hover:scale-105">
                 {/* Product Image */}
                 <div className="relative h-48 bg-gradient-to-br from-gray-100 to-gray-200">
                   {product.image ? (
@@ -313,7 +313,7 @@ export default function Products() {
                   ) : (
                     <div className="flex items-center justify-between bg-green-50 rounded-lg p-2">
                       <button
-                        onClick={() => updateQuantity(product.id, -1)}
+                        onClick={() => updateQuantity(product._id, -1)}
                         className="w-8 h-8 bg-green-500 text-white rounded-full flex items-center justify-center hover:bg-green-600 transition-colors"
                       >
                         <Minus size={14} />
@@ -322,7 +322,7 @@ export default function Products() {
                         {quantityInCart} in cart
                       </span>
                       <button
-                        onClick={() => updateQuantity(product.id, 1)}
+                        onClick={() => updateQuantity(product._id, 1)}
                         className="w-8 h-8 bg-green-500 text-white rounded-full flex items-center justify-center hover:bg-green-600 transition-colors"
                       >
                         <Plus size={14} />
