@@ -38,7 +38,7 @@ Built with **React.js, Node.js, Express, and MongoDB**, it provides a smooth and
    node server.js
    ```
 
-6. **Install Dependencies**
+6. **Run the frontend**
    ```bash
    npm start
    ```
