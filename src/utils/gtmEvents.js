@@ -6,24 +6,6 @@ const pushToDataLayer = (eventData) => {
   window.dataLayer.push(eventData);
 };
 
-// View item list (e.g. on Products page)
-export const gtm_viewItemList = (products, listName = "Products") => {
-  pushToDataLayer({
-    event: "view_item_list",
-    ecommerce: {
-      item_list_id: listName.toLowerCase().replace(/\s+/g, "_"),
-      item_list_name: listName,
-      items: products.map((item, index) => ({
-        item_id: item._id,
-        item_name: item.name,
-        price: item.price,
-        item_category: item.category,
-        index,
-      })),
-    },
-  });
-};
-
 // Add to cart
 export const gtm_addToCart = (item) => {
   pushToDataLayer({
@@ -63,26 +45,7 @@ export const gtm_removeFromCart = (item) => {
   });
 };
 
-// (Optional) View single product
-export const viewItem = (item) => {
-  pushToDataLayer({
-    event: "view_item",
-    ecommerce: {
-      currency: "INR",
-      value: item.price,
-      items: [
-        {
-          item_id: item._id,
-          item_name: item.name,
-          price: item.price,
-          item_category: item.category,
-        },
-      ],
-    },
-  });
-};
-
-// (Optional) Purchase (e.g. after successful booking/order)
+// Booking of product
 export const gtm_book = (orderId, items, totalAmount) => {
   pushToDataLayer({
     event: "booking",
