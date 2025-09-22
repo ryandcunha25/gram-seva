@@ -91,6 +91,7 @@ export default function Products() {
       setCart([...cart, { ...product, quantity: 1 }]);
     }
     gtm_addToCart(product); // GTM Event
+    console.log("Added to cart:", product);
     showNotification(`${product.name} added to cart!`, "success");
   };
 
@@ -110,6 +111,7 @@ export default function Products() {
   if (itemToRemove) {
     // Fire GTM event before removing
     gtm_removeFromCart(itemToRemove);
+    console.log("Removed from cart:", itemToRemove);
   }
 
   setCart(cart.filter(item => item._id !== productId));
