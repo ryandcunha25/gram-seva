@@ -12,6 +12,7 @@ import Dashboard from "./pages/Dashboard";
 import Services from "./pages/Services";
 
 
+
 function App(){
     useEffect(() => {
     TagManager.initialize({ gtmId: "GTM-XXXX" });

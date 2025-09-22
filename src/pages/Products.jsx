@@ -4,6 +4,7 @@ import Navbar from "../components/Navbar";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import { gtm_addToCart, gtm_removeFromCart } from "../utils/gtmEvents";
 
 export default function Products() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -89,7 +90,7 @@ export default function Products() {
     } else {
       setCart([...cart, { ...product, quantity: 1 }]);
     }
-
+    gtm_addToCart(product); // GTM Event
     showNotification(`${product.name} added to cart!`, "success");
   };
 
@@ -103,10 +104,18 @@ export default function Products() {
     }).filter(Boolean));
   };
 
-  const removeFromCart = (productId) => {
-    setCart(cart.filter(item => item._id !== productId));
-    showNotification("Item removed from cart!", "success");
-  };
+ const removeFromCart = (productId) => {
+  const itemToRemove = cart.find(item => item._id === productId);
+
+  if (itemToRemove) {
+    // Fire GTM event before removing
+    gtm_removeFromCart(itemToRemove);
+  }
+
+  setCart(cart.filter(item => item._id !== productId));
+
+  showNotification("Item removed from cart!", "success");
+};
 
   const getItemQuantityInCart = (productId) => {
     const item = cart.find(item => item._id === productId);
