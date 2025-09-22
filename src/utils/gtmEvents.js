@@ -3,7 +3,6 @@
 // Ensure dataLayer exists
 const pushToDataLayer = (eventData) => {
   window.dataLayer = window.dataLayer || [];
-  window.dataLayer.push({ ecommerce: null }); // clear previous ecommerce data
   window.dataLayer.push(eventData);
 };
 
