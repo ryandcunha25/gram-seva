@@ -4,7 +4,7 @@ import Navbar from "../components/Navbar";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
-import { gtm_addToCart, gtm_removeFromCart } from "../utils/gtmEvents";
+import { gtm_addToCart, gtm_book, gtm_removeFromCart } from "../utils/gtmEvents";
 
 export default function Products() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -105,19 +105,19 @@ export default function Products() {
     }).filter(Boolean));
   };
 
- const removeFromCart = (productId) => {
-  const itemToRemove = cart.find(item => item._id === productId);
+  const removeFromCart = (productId) => {
+    const itemToRemove = cart.find(item => item._id === productId);
 
-  if (itemToRemove) {
-    // Fire GTM event before removing
-    gtm_removeFromCart(itemToRemove);
-    console.log("Removed from cart:", itemToRemove);
-  }
+    if (itemToRemove) {
+      // Fire GTM event before removing
+      gtm_removeFromCart(itemToRemove);
+      console.log("Removed from cart:", itemToRemove);
+    }
 
-  setCart(cart.filter(item => item._id !== productId));
+    setCart(cart.filter(item => item._id !== productId));
 
-  showNotification("Item removed from cart!", "success");
-};
+    showNotification("Item removed from cart!", "success");
+  };
 
   const getItemQuantityInCart = (productId) => {
     const item = cart.find(item => item._id === productId);
@@ -174,6 +174,7 @@ export default function Products() {
       );
 
       if (response.status === 200 || response.status === 201) {
+        gtm_book(response.data.bookingId, cart, getTotalCartValue()); // GTM Event
         showNotification("Booking successful! Your order has been placed.", "success");
         setCart([]);
         setTimeout(() => { navigate("/dashboard"); }, 1000);

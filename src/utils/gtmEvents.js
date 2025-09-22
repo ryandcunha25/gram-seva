@@ -84,7 +84,7 @@ export const viewItem = (item) => {
 };
 
 // (Optional) Purchase (e.g. after successful booking/order)
-export const purchase = (orderId, items, totalAmount) => {
+export const gtm_book = (orderId, items, totalAmount) => {
   pushToDataLayer({
     event: "purchase",
     ecommerce: {
