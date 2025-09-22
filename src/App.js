@@ -1,5 +1,6 @@
 // src/App.js
-import React from "react";
+import React, { useEffect } from "react";
+import TagManager from "react-gtm-module";
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
@@ -10,7 +11,12 @@ import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
 import Services from "./pages/Services";
 
+
 function App(){
+    useEffect(() => {
+    TagManager.initialize({ gtmId: "GTM-XXXX" });
+    console.log("GTM Initialized");
+  }, []);
   return (
     <Router>
       {/* <Navbar /> */}
